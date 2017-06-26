@@ -1,0 +1,103 @@
+<html>
+<head>
+<title>The SwingLabs Quick Color Chooser</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+The Quick Color Chooser is a Swing component for that lets you choose a color
+in a single mouse gesture.  When clicked, it pops up a palette;  dragging the 
+mouse over the palette, you will see the component's color update.  Release the
+mouse when it is the desired color.
+<table border="0">
+    <tr><td>
+<h2>Quick Color Chooser</h2>
+<p>
+The Quick Color Chooser has several palettes (or you can add your own) - 
+combinations of Alt, Shift and Ctrl (Command on Macintosh) switch palettes 
+on the fly.  Continuous (rainbow) saturated and desaturated palettes are 
+provides, along with a palette of swatches containing the SVG/XWindows 
+color contants, Swing and AWT constants, and a history palette of recently
+selected colors.  The class <a href="javadoc/net/java/dev/colorchooser/ColorChooser.html"><code>
+net.java.dev.colorchooser.ColorChooser</code></a> is the entry point.
+<p/>
+Update: 2/16/2008 - Jeremy Wood has contributed his <a href="colorpicker/index.html">color-wheel based</a>
+color picker - much nicer than JColorChooser for dialogs.  It is integrated
+into the color chooser as well - if you press enter on the color chooser,
+(or Ctrl-Click on Mac, Meta-Click on PC) a dialog will open with one,
+solving the accesibility problem.  The class <code><a href="javadoc/com/bric/swing/ColorPicker.html">
+com.bric.swing.ColorPicker</a></code> is the entry point.
+<img align="left" src="images/cc2.png"/>
+</td><td>    
+<h2>Download</h2>
+<ul>
+    <!-- <li><a href="demo/colorcalc.jnlp">Try the WebStart Demo</a></li> -->
+    <li><a href="demo/demo.jar">Try the Color Calculator Demo App</a></li>
+    <li><a href="release/net-java-dev-colorchooser.nbm">Download a NetBeans
+        Module</a> that installs the Quick Color Chooser in the component palette
+        for easy drag-and-drop, with source and javadoc</li>
+    <li><a href="release/colorchooser.jar">Download the ColorChooser Library</a></li>
+    <li><a href="http://colorchooser.dev.java.net/nonav/javadoc/index.html">Read the JavaDoc</a></li>
+    <li><a href="release/colorchooser-javadoc.zip">Download the JavaDoc</a></li>
+    <LI><A HREF="release/src.zip">Download the NetBeans </A>
+
+</ul>
+<h2>Usage</h2>
+This is an extremely simple component with one property of interest - <code>color</code>:
+<pre>
+final ColorChooser cc = new ColorChooser();
+someContainer.add (cc);
+cc.addActionListener (new ActionListener() {
+   public void actionPerformed (ActionEvent ae) {
+      something.setColor (cc.getColor());
+   }
+});
+</pre>
+</td></tr></table>
+
+<h2>Installing the NetBeans Module</h2>
+<img align="right" src="images/ccMatisse.png"/>
+The module was created using <a href="http://contrib.netbeans.org/beans2nbm/">BeanNetter</a>,
+which can wrap any JavaBean in a NetBeans module so it installs directly into
+the component palette in <a href="http://netbeans.org">NetBeans</a>.
+<p>
+To install it, simply choose <code>Tools | Plugins</code>, go to the
+<code>Downloaded</code> tab.  Click <code>Add Plugins</code> and choose
+
+
+click the radio
+button in the wizard that says <code>Install Manually Downloaded Modules</code>,
+select the <a href="release/net-java-dev-colorchooser.nbm">nbm file</a> and it
+will appear on the component palette in <a href="http://form.netbeans.org">Matisse</a>.
+<BR><img src="images/cc1.png"/>
+<P>
+<TABLE>
+
+<TR><TD>
+<h2>Color Picker</h2>
+<P>The ColorPicker is a separate subproject that offers detailed control in choosing/browsing colors:
+<P><IMG SRC="images/colorpicker.jpg">
+</TD><TD VALIGN="top">
+<h2>Download</h2>
+<LI><A HREF="release/colorpicker.jar">Download the ColorPicker executable</A>
+<LI><A HREF="release/colorpicker-src.zip">Download the ColorPicker source</A>
+<LI><A HREF="nonav/colorpicker/javadoc/index.html">Read the javadoc</A>
+<LI><A HREF="release/colorpicker-doc.zip">Download the javadoc</A>
+</LI>
+<P>
+<h2>Usage</h2>
+<p>
+This dialog can be invoked in one simple line:
+</p>
+<pre>
+Color newColor = ColorPicker.showDialog(
+ &nbsp &nbsp myFrame, originalColor);
+</pre>
+<P>The ColorPicker itself is a resizable JComponent and it can be placed anywhere in your application, but it was primarily designed to be used in a dialog.
+<P>
+<h2>About</h2>
+The ColorPicker project is maintained by <A HREF="mailto:mickleness@dev.java.net">mickleness</A>, and is discussed in a little bit more detail <A HREF="http://javagraphics.blogspot.com/2007/04/jcolorchooser-making-alternative.html">here</A>.
+</TD></TR>
+</body>
+</html>
+

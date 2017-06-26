@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp codebase="http://colorchooser.dev.java.net/demo/" href="demo.jnlp">
+  <information>
+    <title>Color Calculator</title>
+    <vendor>Tim Boudreau</vendor>
+    <homepage href="http://weblogs.java.net/blog/timboudreau"/>
+    <description>A simple color calculator that demos the color chooser</description>
+    <icon href="default"/>
+    <offline-allowed/>
+    <shortcut online="true">
+      <desktop/>
+    </shortcut>
+  </information>
+  <resources locale="" os="">
+    <j2se href="http://java.sun.com/products/autodl/j2se" version="1.5+"/>
+  </resources>
+  <resources locale="" os="">
+    <j2se version="1.5.0"/>
+    <jar download="eager" href="demo.jar" main="true"/>
+  </resources>
+  <application-desc main-class="colorpicker.ColorPickerFrame"/>
+</jnlp>
