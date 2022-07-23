@@ -1,25 +1,27 @@
 /*
-* @(#)ColorPicker.java  1.0  2008-03-01
-*
-* Copyright (c) 2008 Jeremy Wood
-* E-mail: mickleness@gmail.com
-* All rights reserved.
-*
-* The copyright of this software is owned by Jeremy Wood.
-* You may not use, copy or modify this software, except in
-* accordance with the license agreement you entered into with
-* Jeremy Wood. For details see accompanying license terms.
-*/
-
+ * Copyright 2010-2019 Tim Boudreau
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package com.bric.swing;
 
 import java.awt.*;
-
-import javax.swing.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.*;
 import javax.swing.event.*;
 
 /** This is a panel that offers a robust set of controls to pick a color.
@@ -50,7 +52,7 @@ public class ColorPicker extends JPanel {
 	private static final long serialVersionUID = 3L;
 	
 	/** The localized strings used in this (and related) panel(s). */
-	protected static ResourceBundle strings = ResourceBundle.getBundle("com.bric.swing.ColorPicker");
+	protected static ResourceBundle strings = ResourceBundle.getBundle("com.bric.swing.resources.ColorPicker");
 	
 	/** This demonstrates how to customize a small <code>ColorPicker</code> component.
 	 */
@@ -299,6 +301,7 @@ public class ColorPicker extends JPanel {
 	private JSlider slider = new JSlider(JSlider.VERTICAL,0,100,0);
 	
 	ChangeListener changeListener = new ChangeListener() {
+        @Override
 		public void stateChanged(ChangeEvent e) {
 			Object src = e.getSource();
 
@@ -350,6 +353,7 @@ public class ColorPicker extends JPanel {
 	};
 	
 	ActionListener actionListener = new ActionListener() {
+        @Override
 		public void actionPerformed(ActionEvent e) {
 			Object src = e.getSource();
 			if(src==hue.radioButton) {
@@ -372,19 +376,20 @@ public class ColorPicker extends JPanel {
 	 */
 	private Option getSelectedOption() {
 		int mode = getMode();
-		if(mode==HUE) {
-			return hue;
-		} else if(mode==SAT) {
-			return sat;
-		} else if(mode==BRI) {
-			return bri;
-		} else if(mode==RED) {
-			return red;
-		} else if(mode==GREEN) {
-			return green;
-		} else {
-			return blue;
-		}
+        switch (mode) {
+            case HUE:
+                return hue;
+            case SAT:
+                return sat;
+            case BRI:
+                return bri;
+            case RED:
+                return red;
+            case GREEN:
+                return green;
+            default:
+                return blue;
+        }
 	}
 	
 	/** This thread will wait a second or two before committing the text in
@@ -396,21 +401,22 @@ public class ColorPicker extends JPanel {
 		long myStamp;
 		String text;
 		
-		public HexUpdateThread(long stamp,String s) {
+		HexUpdateThread(long stamp,String s) {
 			myStamp = stamp;
 			text = s;
 		}
 		
+        @Override
 		public void run() {
 			if(SwingUtilities.isEventDispatchThread()==false) {
-				long WAIT = 1500;
+				long WAIT = 1_500;
 
 				while(System.currentTimeMillis()-myStamp<WAIT) {
 					try {
 						long delay = WAIT - (System.currentTimeMillis()-myStamp);
 						if(delay<1) delay = 1;
 						Thread.sleep( delay );
-					} catch(Exception e) {
+					} catch(InterruptedException e) {
 						Thread.yield();
 					}
 				}
@@ -426,7 +432,7 @@ public class ColorPicker extends JPanel {
 			if(text.length()>6)
 				text = text.substring(0,6);
 			while(text.length()<6) {
-				text = text+"0";
+                            text += "0";
 			}
 			if(hexField.getText().equals(text))
 				return;
@@ -442,6 +448,7 @@ public class ColorPicker extends JPanel {
 	class HexDocumentListener implements DocumentListener {
 		long lastTimeStamp;
 		
+        @Override
 		public void changedUpdate(DocumentEvent e) {
 			lastTimeStamp = System.currentTimeMillis();
 			
@@ -477,16 +484,18 @@ public class ColorPicker extends JPanel {
 				if(c=='0' || c=='1' || c=='2' || c=='3' || c=='4' || c=='5' ||
 						c=='6' || c=='7' || c=='8' || c=='9' || c=='0' ||
 						c=='A' || c=='B' || c=='C' || c=='D' || c=='E' || c=='F') {
-					s2 = s2+c;
+                                    s2 += c;
 				}
 			}
 			return s2;
 		}
 
+        @Override
 		public void insertUpdate(DocumentEvent e) {
 			changedUpdate(e);
 		}
 
+        @Override
 		public void removeUpdate(DocumentEvent e) {
 			changedUpdate(e);
 		}
@@ -626,16 +635,16 @@ public class ColorPicker extends JPanel {
 		c.fill = GridBagConstraints.VERTICAL; c.weightx = 0;
 		add(slider,c);
 		
-		c.gridx++; c.fill = GridBagConstraints.VERTICAL; c.gridheight = c.REMAINDER;
+		c.gridx++; c.fill = GridBagConstraints.VERTICAL; c.gridheight = GridBagConstraints.REMAINDER;
 		c.anchor = GridBagConstraints.CENTER; c.insets = new Insets(0,0,0,0);
 		add(expertControls,c);
 		
 		c.gridx = 0; c.gridheight = 1;
 		c.gridy = 1; c.weightx = 0; c.weighty = 0;
-		c.insets = normalInsets; c.anchor = c.CENTER;
+		c.insets = normalInsets; c.anchor = GridBagConstraints.CENTER;
 		add(opacityLabel,c);
 		c.gridx++; c.gridwidth = 2;
-		c.weightx = 1; c.fill = c.HORIZONTAL;
+		c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL;
 		add(opacitySlider,c);
 		
 		c.gridx = 0; c.gridy = 0;
@@ -741,9 +750,9 @@ public class ColorPicker extends JPanel {
 		try {
 			int i = (int)(255*v);
 			opacitySlider.setValue( i );
-			alpha.spinner.setValue( new Integer(i) );
+			alpha.spinner.setValue( i );
 			if(lastOpacity!=v) {
-				firePropertyChange(OPACITY_PROPERTY,new Float(lastOpacity),new Float(i));
+				firePropertyChange(OPACITY_PROPERTY,Float.valueOf(lastOpacity),Float.valueOf(i));
 				Color c = preview.getForeground();
 				preview.setForeground(new Color(c.getRed(), c.getGreen(), c.getBlue(), i));
 			}
@@ -762,7 +771,7 @@ public class ColorPicker extends JPanel {
 	public void setMode(int mode) {
 		if(!(mode==HUE || mode==SAT || mode==BRI || mode==RED || mode==GREEN || mode==BLUE))
 			throw new IllegalArgumentException("mode must be HUE, SAT, BRI, REd, GREEN, or BLUE");
-		putClientProperty(MODE_PROPERTY,new Integer(mode));
+		putClientProperty(MODE_PROPERTY, mode);
 		hue.radioButton.setSelected(mode==HUE);
 		sat.radioButton.setSelected(mode==SAT);
 		bri.radioButton.setSelected(mode==BRI);
@@ -810,7 +819,7 @@ public class ColorPicker extends JPanel {
 		red.radioButton.setVisible(b && red.isVisible());
 		green.radioButton.setVisible(b && green.isVisible());
 		blue.radioButton.setVisible(b && blue.isVisible());
-		putClientProperty(MODE_CONTROLS_VISIBLE_PROPERTY,new Boolean(b));
+		putClientProperty(MODE_CONTROLS_VISIBLE_PROPERTY, b);
 	}
 	
 	/** @return the current mode of this <code>ColorPicker</code>.
@@ -894,19 +903,28 @@ public class ColorPicker extends JPanel {
 		adjustingSlider++;
 		try {
 			int mode = getMode();
-			if(mode==HUE) {
-				slider.setValue( hue.getIntValue() );
-			} else if(mode==SAT) {
-				slider.setValue( sat.getIntValue() );
-			} else if(mode==BRI) {
-				slider.setValue( bri.getIntValue() );
-			} else if(mode==RED) {
-				slider.setValue( red.getIntValue() );
-			} else if(mode==GREEN) {
-				slider.setValue( green.getIntValue() );
-			} else if(mode==BLUE) {
-				slider.setValue( blue.getIntValue() );
-			}
+            switch (mode) {
+                case HUE:
+                    slider.setValue( hue.getIntValue() );
+                    break;
+                case SAT:
+                    slider.setValue( sat.getIntValue() );
+                    break;
+                case BRI:
+                    slider.setValue( bri.getIntValue() );
+                    break;
+                case RED:
+                    slider.setValue( red.getIntValue() );
+                    break;
+                case GREEN:
+                    slider.setValue( green.getIntValue() );
+                    break;
+                case BLUE:
+                    slider.setValue( blue.getIntValue() );
+                    break;
+                default:
+                    break;
+            }
 		} finally {
 			adjustingSlider--;
 		}
@@ -1039,7 +1057,7 @@ public class ColorPicker extends JPanel {
 		JSpinner spinner;
 		JSlider slider;
 		JLabel label;
-		public Option(String text,int max) {
+		Option(String text,int max) {
 			spinner = new JSpinner(new SpinnerNumberModel(0,0,max,5));
 			spinner.addChangeListener(changeListener);
 			
@@ -1067,7 +1085,7 @@ public class ColorPicker extends JPanel {
 				slider.setValue(i);
 			}
 			if(spinner!=null) {
-				spinner.setValue(new Integer(i));
+				spinner.setValue(i);
 			}
 		}
 		
@@ -1109,3 +1127,10 @@ public class ColorPicker extends JPanel {
 		}
 	}
 }
+
+
+
+
+
+
+

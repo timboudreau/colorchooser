@@ -1,45 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2000-2008 Tim Boudreau. All rights reserved.
- * 
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * 
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- * 
- * Contributor(s):
- */
-/*
- * ColorPickerFrame.java
+ * Copyright 2010-2019 Tim Boudreau
  *
- * Created on August 18, 2006, 1:23 PM
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
-package colorpicker;
+package net.java.dev.colorchooser.demo;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -60,7 +35,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.security.AccessControlException;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
@@ -124,7 +98,7 @@ public class ColorPickerFrame extends javax.swing.JFrame implements DocumentList
             try {
                 prefs = Preferences.userNodeForPackage(
                         ColorPickerFrame.class);
-            } catch (AccessControlException e) {
+            } catch (Exception e) {
                 cantGetPreferences = true;
             }
         }
@@ -720,6 +694,7 @@ public class ColorPickerFrame extends javax.swing.JFrame implements DocumentList
      * @param args the command line arguments
      */
     public static void main(String args[]) throws Exception {
+        System.setProperty("awt.useSystemAAFontSettings", "lcd_hrgb");
         if (args.length == 1 && "reset".equals(args[0])) {
             Preferences prefs = getPreferences();
             if (prefs != null) {
@@ -730,9 +705,9 @@ public class ColorPickerFrame extends javax.swing.JFrame implements DocumentList
                 }
             }
         }
-        runIt();
+        EventQueue.invokeLater(ColorPickerFrame::runIt);
     }
-    
+
     static JFrame runIt() {
         try {
             UIManager.setLookAndFeel (UIManager.getSystemLookAndFeelClassName());

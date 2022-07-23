@@ -1,43 +1,18 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2000-2008 Tim Boudreau. All rights reserved.
- * 
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * 
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- * 
- * Contributor(s):
- */
- /*
- * ColorPicker.java
+ * Copyright 2010-2019 Tim Boudreau
  *
- * Created on 30. listopad 2003, 9:14
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 package net.java.dev.colorchooser;
 
@@ -59,7 +34,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.Objects;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.Control.FORMAT_PROPERTIES;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -67,6 +44,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
@@ -199,11 +177,6 @@ public final class ColorChooser extends JComponent {
         return ColorParser.toMinimalString(getColor());
     }
 
-    @Override
-    public int getBaseline(int width, int height) {
-        return super.getBaseline(width, height); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public boolean setAsText(String s) {
         Color c = ColorParser.parse(s);
         if (c != null) {
@@ -286,9 +259,9 @@ public final class ColorChooser extends JComponent {
      * else returning a String representing RGB values.
      */
     public static String colorToString(Color c) {
-        NamedColor named = RecentColors.getDefault().findNamedColor(c);
+        NamedColor named = RecentColors.findNamedColor(c);
         if (named == null) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(c.getRed());
             sb.append(',');
             sb.append(c.getGreen());
@@ -383,11 +356,11 @@ public final class ColorChooser extends JComponent {
     }
 
     static String getString(String key) {
-        String BUNDLE = "net.java.dev.colorchooser.Bundle"; //NOI18N
+        String BUNDLE = "net.java.dev.colorchooser.resources.Bundle"; //NOI18N
         try {
             return ResourceBundle.getBundle(BUNDLE).getString(key);
         } catch (MissingResourceException mre) {
-//            mre.printStackTrace();
+            mre.printStackTrace();
             return key;
         }
     }
@@ -583,7 +556,7 @@ public final class ColorChooser extends JComponent {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel()); //NOI18N
-        } catch (Exception e) {
+        } catch (UnsupportedLookAndFeelException e) {
 
         }
         final javax.swing.JLabel jb1 = new javax.swing.JLabel("Choose a color"
@@ -637,12 +610,13 @@ public final class ColorChooser extends JComponent {
 //        });
 //        jf.getContentPane().add (jb);
         jb.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
                     for (int i = 0; i < 5; i++) {
                         System.gc();
                         System.runFinalization();
-                        Thread.currentThread().yield();
+                        Thread.yield();
                     }
                 } catch (Exception e) {
                 }

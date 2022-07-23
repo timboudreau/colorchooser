@@ -1,38 +1,18 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2000-2008 Tim Boudreau. All rights reserved.
- * 
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * 
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- * 
- * Contributor(s):
+ * Copyright 2010-2019 Tim Boudreau
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 package net.java.dev.colorchooser;
 
@@ -144,6 +124,7 @@ final class ContinuousPalette extends Palette {
   /** Paints the image at Coordinates 0,0 on the graphics context passed to it.
    * @param g A graphics context to be painted into
    */
+    @Override
   public void paintTo(java.awt.Graphics g) {
     if (g != null) {
       initializeImage();
@@ -162,6 +143,7 @@ final class ContinuousPalette extends Palette {
    * @param x The X coordinate for which a color value is desired
    * @param y The Y coordinate for which a color value is desired
    */
+    @Override
   public java.awt.Color getColorAt (int x, int y) {
     float hue;
     float brightness;
@@ -175,7 +157,7 @@ final class ContinuousPalette extends Palette {
       hue = 1 - (((float) x) / img.getWidth());   //subtract from 1 so lightest color are at top   
       brightness = 1 - ((float) y) / img.getHeight();
     }
-    brightness = brightness * 2;   //brightness increases to the halfway point along the brightening axis.
+    brightness *= 2;   //brightness increases to the halfway point along the brightening axis.
     if (brightness > 1) {          //beyond that point, saturation goes down so color moves toward white
        workingSaturation = saturation - ((brightness - 1) * saturation);  //if we're past the halfway point,
        brightness = 1;                                                    //we're decrementing saturation
@@ -187,9 +169,7 @@ final class ContinuousPalette extends Palette {
   }  
   
   public java.awt.Color colorFromPoint (final Point p) {
-    int x = new Double (p.getX()).intValue();
-    int y = new Double (p.getY()).intValue();
-    return getColorAt (x, y);
+    return getColorAt (p.x, p.y);
   }
   
   
@@ -271,13 +251,16 @@ final class ContinuousPalette extends Palette {
   
   /** Returns the size of the image as a java.awt.Dimension object.
    */
+    @Override
   public Dimension getSize() {
     return new Dimension (img.getWidth(), img.getHeight());
   }
   
+    @Override
   public String getNameAt(int x, int y) {
       Color c = getColorAt(x,y);
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
+      sb.append(ColorParser.toMinimalString(c)).append("    ");
       sb.append(c.getRed());
       sb.append(','); //NOI18N
       sb.append(c.getGreen());
@@ -301,6 +284,7 @@ final class ContinuousPalette extends Palette {
       return defaultPalettes;
   }  
   
+    @Override
   public String getDisplayName() {
     return ColorChooser.getString(name);
   }

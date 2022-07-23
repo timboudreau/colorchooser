@@ -1,26 +1,29 @@
 /*
-* @(#)ColorPickerPanel.java  1.0  2008-03-01
-*
-* Copyright (c) 2008 Jeremy Wood
-* E-mail: mickleness@gmail.com
-* All rights reserved.
-*
-* The copyright of this software is owned by Jeremy Wood.
-* You may not use, copy or modify this software, except in
-* accordance with the license agreement you entered into with
-* Jeremy Wood. For details see accompanying license terms.
-*/
-
+ * Copyright 2010-2019 Tim Boudreau
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package com.bric.swing;
 
-import java.util.*;
-import javax.swing.event.*;
+import com.bric.awt.*;
 import java.awt.*;
-import javax.swing.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
-import com.bric.awt.*;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.event.*;
 
 /** This is the large graphic element in the <code>ColorPicker</code>
  * that depicts a wide range of colors.
@@ -70,76 +73,92 @@ public class ColorPickerPanel extends JPanel {
 	int red = -1, green = -1, blue = -1;
 	
 	MouseInputListener mouseListener = new MouseInputAdapter() {
+        @Override
 		public void mousePressed(MouseEvent e) {
 			requestFocus();
 			Point p = e.getPoint();
 			int size = Math.min(MAX_SIZE, Math.min(getWidth()-imagePadding.left-imagePadding.right,getHeight()-imagePadding.top-imagePadding.bottom));
 			p.translate(-(getWidth()/2-size/2), -(getHeight()/2-size/2));
-			if(mode==ColorPicker.BRI || mode==ColorPicker.SAT) {
-				//the two circular views:
-				double radius = ((double)size)/2.0;
-				double x = p.getX()-size/2.0;
-				double y = p.getY()-size/2.0;
-				double r = Math.sqrt(x*x+y*y)/radius;
-				double theta = Math.atan2(y,x)/(Math.PI*2.0);
-				
-				if(r>1) r = 1;
-				
-				if(mode==ColorPicker.BRI) {
-					setHSB((float)(theta+.25f),
-							(float)(r),
-							bri);
-				} else {
-					setHSB((float)(theta+.25f),
-							sat,
-							(float)(r) );
-				}
-			} else if(mode==ColorPicker.HUE) {
-				float s = ((float)p.x)/((float)size);
-				float b = ((float)p.y)/((float)size);
-				if(s<0) s = 0;
-				if(s>1) s = 1;
-				if(b<0) b = 0;
-				if(b>1) b = 1;
-				setHSB( hue,
-						s,
-						b );
-			} else {
-				int x2 = p.x*255/size;
-				int y2 = p.y*255/size;
-				if(x2<0) x2 = 0;
-				if(x2>255) x2 = 255;
-				if(y2<0) y2 = 0;
-				if(y2>255) y2 = 255;
-				
-				if(mode==ColorPicker.RED) {
-					setRGB(red,x2,y2);
-				} else if(mode==ColorPicker.GREEN) {
-					setRGB(x2,green,y2);
-				} else {
-					setRGB(x2,y2,blue);
-				}
-			}
+            switch (mode) {
+                case ColorPicker.BRI:
+                case ColorPicker.SAT:
+                    //the two circular views:
+                    double radius = ((double)size)/2.0;
+                    double x = p.getX()-size/2.0;
+                    double y = p.getY()-size/2.0;
+                    double r = Math.sqrt(x*x+y*y)/radius;
+                    double theta = Math.atan2(y,x)/(Math.PI*2.0);
+                    if(r>1) r = 1;
+                    if(mode==ColorPicker.BRI) {
+                        setHSB((float)(theta+.25f),
+                                (float)(r),
+                                bri);
+                    } else {
+                        setHSB((float)(theta+.25f),
+                                sat,
+                                (float)(r) );
+                    }
+                    break;
+                case ColorPicker.HUE:
+                    float s = ((float)p.x)/((float)size);
+                    float b = ((float)p.y)/((float)size);
+                    if(s<0) s = 0;
+                    if(s>1) s = 1;
+                    if(b<0) b = 0;
+                    if(b>1) b = 1;
+                    setHSB( hue,
+                            s,
+                            b );
+                    break;
+                default:
+                    int x2 = p.x*255/size;
+                    int y2 = p.y*255/size;
+                    if(x2<0) x2 = 0;
+                    if(x2>255) x2 = 255;
+                    if(y2<0) y2 = 0;
+                    if(y2>255) y2 = 255;
+                    switch (mode) {
+                        case ColorPicker.RED:
+                            setRGB(red,x2,y2);
+                            break;
+                        case ColorPicker.GREEN:
+                            setRGB(x2,green,y2);
+                            break;
+                        default:
+                            setRGB(x2,y2,blue);
+                            break;
+                    }
+                    break;
+            }
 		}
 
+        @Override
 		public void mouseDragged(MouseEvent e) {
 			mousePressed(e);
 		}
 	};
 	
 	KeyListener keyListener = new KeyAdapter() {
+        @Override
 		public void keyPressed(KeyEvent e) {
 			int dx = 0;
 			int dy = 0;
-			if(e.getKeyCode()==KeyEvent.VK_LEFT) {
-				dx = -1;
-			} else if(e.getKeyCode()==KeyEvent.VK_RIGHT) {
-				dx = 1;
-			} else if(e.getKeyCode()==KeyEvent.VK_UP) {
-				dy = -1;
-			} else if(e.getKeyCode()==KeyEvent.VK_DOWN) {
-				dy = 1;
-			}
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_LEFT:
+                    dx = -1;
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    dx = 1;
+                    break;
+                case KeyEvent.VK_UP:
+                    dy = -1;
+                    break;
+                case KeyEvent.VK_DOWN:
+                    dy = 1;
+                    break;
+                default:
+                    break;
+            }
 			int multiplier = 1;
 			if(e.isShiftDown() && e.isAltDown()) {
 				multiplier = 10;
@@ -163,9 +182,11 @@ public class ColorPickerPanel extends JPanel {
 	};
 	
 	FocusListener focusListener = new FocusListener() {
+        @Override
 		public void focusGained(FocusEvent e) {
 			repaint();
 		}
+        @Override
 		public void focusLost(FocusEvent e) {
 			repaint();
 		}
@@ -173,6 +194,7 @@ public class ColorPickerPanel extends JPanel {
 	
 	ComponentListener componentListener = new ComponentAdapter() {
 
+        @Override
 		public void componentResized(ComponentEvent e) {
 			regeneratePoint();
 			regenerateImage();
@@ -235,6 +257,7 @@ public class ColorPickerPanel extends JPanel {
 	
 	Insets imagePadding = new Insets(6,6,6,6);
 	
+    @Override
 	public void paint(Graphics g) {
 		super.paint(g);
 
@@ -333,19 +356,25 @@ public class ColorPickerPanel extends JPanel {
 				green = g;
 				blue = b;
 				
-				if(mode==ColorPicker.RED) {
-					if(lastR!=r) {
-						regenerateImage();
-					}
-				} else if(mode==ColorPicker.GREEN) {
-					if(lastG!=g) {
-						regenerateImage();
-					}
-				} else if(mode==ColorPicker.BLUE) {
-					if(lastB!=b) {
-						regenerateImage();
-					}
-				}
+                switch (mode) {
+                    case ColorPicker.RED:
+                        if(lastR!=r) {
+                            regenerateImage();
+                        }
+                        break;
+                    case ColorPicker.GREEN:
+                        if(lastG!=g) {
+                            regenerateImage();
+                        }
+                        break;
+                    case ColorPicker.BLUE:
+                        if(lastB!=b) {
+                            regenerateImage();
+                        }
+                        break;
+                    default:
+                        break;
+                }
 			} else {
 				float[] hsb = new float[3];
 				Color.RGBtoHSB(r, g, b, hsb);
@@ -404,19 +433,25 @@ public class ColorPickerPanel extends JPanel {
 				hue = h;
 				sat = s;
 				bri = b;
-				if(mode==ColorPicker.HUE) {
-					if(lastHue!=hue) {
-						regenerateImage();
-					}
-				} else if(mode==ColorPicker.SAT) {
-					if(lastSat!=sat) {
-						regenerateImage();
-					}
-				} else if(mode==ColorPicker.BRI) {
-					if(lastBri!=bri) {
-						regenerateImage();
-					}
-				}
+                switch (mode) {
+                    case ColorPicker.HUE:
+                        if(lastHue!=hue) {
+                            regenerateImage();
+                        }
+                        break;
+                    case ColorPicker.SAT:
+                        if(lastSat!=sat) {
+                            regenerateImage();
+                        }
+                        break;
+                    case ColorPicker.BRI:
+                        if(lastBri!=bri) {
+                            regenerateImage();
+                        }
+                        break;
+                    default:
+                        break;
+                }
 			} else {
 
 				Color c = new Color(Color.HSBtoRGB(h, s, b));
@@ -439,107 +474,138 @@ public class ColorPickerPanel extends JPanel {
 	/** Recalculates the (x,y) point used to indicate the selected color. */
 	private void regeneratePoint() {
 		int size = Math.min(MAX_SIZE, Math.min(getWidth()-imagePadding.left-imagePadding.right,getHeight()-imagePadding.top-imagePadding.bottom));
-		if(mode==ColorPicker.HUE || mode==ColorPicker.SAT || mode==ColorPicker.BRI) {
-			if(mode==ColorPicker.HUE) {
-				point = new Point((int)(sat*size),(int)(bri*size));
-			} else if(mode==ColorPicker.SAT) {
-				double theta = hue*2*Math.PI-Math.PI/2;
-				if(theta<0) theta+=2*Math.PI;
-				
-				double r = bri*size/2;
-				point = new Point((int)(r*Math.cos(theta)+.5+size/2.0),(int)(r*Math.sin(theta)+.5+size/2.0));
-			} else if(mode==ColorPicker.BRI) {
-				double theta = hue*2*Math.PI-Math.PI/2;
-				if(theta<0) theta+=2*Math.PI;
-				double r = sat*size/2;
-				point = new Point((int)(r*Math.cos(theta)+.5+size/2.0),(int)(r*Math.sin(theta)+.5+size/2.0));
-			}
-		} else if(mode==ColorPicker.RED) {
-			point = new Point((int)(green*size/255f+.49f),
-					(int)(blue*size/255f+.49f) );
-		} else if(mode==ColorPicker.GREEN) {
-			point = new Point((int)(red*size/255f+.49f),
-					(int)(blue*size/255f+.49f) );
-		} else if(mode==ColorPicker.BLUE) {
-			point = new Point((int)(red*size/255f+.49f),
-					(int)(green*size/255f+.49f) );
-		}
+        switch (mode) {
+            case ColorPicker.HUE:
+            case ColorPicker.SAT:
+            case ColorPicker.BRI:
+                switch (mode) {
+                    case ColorPicker.HUE:
+                        point = new Point((int)(sat*size),(int)(bri*size));
+                        break;
+                    case ColorPicker.SAT:
+                        {
+                            double theta = hue*2*Math.PI-Math.PI/2;
+                            if(theta<0) theta+=2*Math.PI;
+                            double r = bri*size/2;
+                            point = new Point((int)(r*Math.cos(theta)+.5+size/2.0),(int)(r*Math.sin(theta)+.5+size/2.0));
+                            break;
+                        }
+                    case ColorPicker.BRI:
+                        {
+                            double theta = hue*2*Math.PI-Math.PI/2;
+                            if(theta<0) theta+=2*Math.PI;
+                            double r = sat*size/2;
+                            point = new Point((int)(r*Math.cos(theta)+.5+size/2.0),(int)(r*Math.sin(theta)+.5+size/2.0));
+                            break;
+                        }
+                    default:
+                        break;
+                }
+                break;
+            case ColorPicker.RED:
+                point = new Point((int)(green*size/255f+.49f),
+                        (int)(blue*size/255f+.49f) );
+                break;
+            case ColorPicker.GREEN:
+                point = new Point((int)(red*size/255f+.49f),
+                        (int)(blue*size/255f+.49f) );
+                break;
+            case ColorPicker.BLUE:
+                point = new Point((int)(red*size/255f+.49f),
+                        (int)(green*size/255f+.49f) );
+                break;
+            default:
+                break;
+        }
 	}
 	
 	/** A row of pixel data we recycle every time we regenerate this image. */
-	private int[] row = new int[MAX_SIZE];
+	private final int[] row = new int[MAX_SIZE];
 	/** Regenerates the image. */
 	private synchronized void regenerateImage() {
 		int size = Math.min(MAX_SIZE, Math.min(getWidth()-imagePadding.left-imagePadding.right,getHeight()-imagePadding.top-imagePadding.bottom));
 		
-		if(mode==ColorPicker.BRI || mode==ColorPicker.SAT) {
-			float bri2 = this.bri;
-			float sat2 = this.sat;
-			float radius = ((float)size)/2f;
-			float hue2;
-			float k = 1.2f; //the number of pixels to antialias
-			for(int y = 0; y<size; y++) {
-				float y2 = (y-size/2f);
-				for(int x = 0; x<size; x++) {
-					float x2 = (x-size/2f);
-					double theta = Math.atan2(y2,x2)-3*Math.PI/2.0;
-					if(theta<0) theta+=2*Math.PI;
-					
-					double r = Math.sqrt(x2*x2+y2*y2);
-					if(r<=radius) {
-						if(mode==ColorPicker.BRI) {
-							hue2 = (float)(theta/(2*Math.PI));
-							sat2 = (float)(r/radius);
-						} else { //SAT
-							hue2 = (float)(theta/(2*Math.PI));
-							bri2 = (float)(r/radius);
-						}
-						row[x] = Color.HSBtoRGB(hue2, sat2, bri2);
-						if(r>radius-k) {
-							int alpha = (int)(255-255*(r-radius+k)/k);
-							if(alpha<0) alpha = 0;
-							if(alpha>255) alpha = 255;
-							row[x] = row[x] & 0xffffff+(alpha << 24);
-						}
-					} else {
-						row[x] = 0x00000000;
-					}
-				}
-				image.getRaster().setDataElements(0, y, size, 1, row);
-			}
-		} else if(mode==ColorPicker.HUE) {
-			float hue2 = this.hue;
-			for(int y = 0; y<size; y++) {
-				float y2 = ((float)y)/((float)size);
-				for(int x = 0; x<size; x++) {
-					float x2 = ((float)x)/((float)size);
-					row[x] = Color.HSBtoRGB(hue2, x2, y2);
-				}
-				image.getRaster().setDataElements(0, y, image.getWidth(), 1, row);
-			}
-		} else { //mode is RED, GREEN, or BLUE
-			int red2 = red;
-			int green2 = green;
-			int blue2 = blue;
-			for(int y = 0; y<size; y++) {
-				float y2 = ((float)y)/((float)size);
-				for(int x = 0; x<size; x++) {
-					float x2 = ((float)x)/((float)size);
-					if(mode==ColorPicker.RED) {
-						green2 = (int)(x2*255+.49);
-						blue2 = (int)(y2*255+.49);
-					} else if(mode==ColorPicker.GREEN) {
-						red2 = (int)(x2*255+.49);
-						blue2 = (int)(y2*255+.49);
-					} else {
-						red2 = (int)(x2*255+.49);
-						green2 = (int)(y2*255+.49);
-					}
-					row[x] = 0xFF000000 + (red2 << 16) + (green2 << 8) + blue2;
-				}
-				image.getRaster().setDataElements(0, y, size, 1, row);
-			}
-		}
+        switch (mode) {
+            case ColorPicker.BRI:
+            case ColorPicker.SAT:
+                {
+                    float bri2 = this.bri;
+                    float sat2 = this.sat;
+                    float radius = ((float)size)/2f;
+                    float hue2;
+                    float k = 1.2f; //the number of pixels to antialias
+                    for (int y = 0; y<size; y++) {
+                        float y2 = (y-size/2f);
+                        for (int x = 0; x<size; x++) {
+                            float x2 = (x-size/2f);
+                            double theta = Math.atan2(y2,x2)-3*Math.PI/2.0;
+                            if(theta<0) theta+=2*Math.PI;
+                            double r = Math.sqrt(x2*x2+y2*y2);
+                            if (r<=radius) {
+                                if(mode==ColorPicker.BRI) {
+                                    hue2 = (float)(theta/(2*Math.PI));
+                                    sat2 = (float)(r/radius);
+                                } else { //SAT
+                                    hue2 = (float)(theta/(2*Math.PI));
+                                    bri2 = (float)(r/radius);
+                                }
+                                row[x] = Color.HSBtoRGB(hue2, sat2, bri2);
+                                if (r>radius-k) {
+                                    int alpha = (int)(255-255*(r-radius+k)/k);
+                                    if(alpha<0) alpha = 0;
+                                    if(alpha>255) alpha = 255;
+                                    row[x] &= 0xff_ffff + (alpha << 24);
+                                }
+                            } else {
+                                row[x] = 0x0000_0000;
+                            }
+                        }
+                        image.getRaster().setDataElements(0, y, size, 1, row);
+                    }
+                    break;
+                }
+            case ColorPicker.HUE:
+                {
+                    float hue2 = this.hue;
+                    for(int y = 0; y<size; y++) {
+                        float y2 = ((float)y)/((float)size);
+                        for(int x = 0; x<size; x++) {
+                            float x2 = ((float)x)/((float)size);
+                            row[x] = Color.HSBtoRGB(hue2, x2, y2);
+                        }
+                        image.getRaster().setDataElements(0, y, image.getWidth(), 1, row);
+                    }
+                    break;
+                }
+            default:
+                //mode is RED, GREEN, or BLUE
+                int red2 = red;
+                int green2 = green;
+                int blue2 = blue;
+                for (int y = 0; y<size; y++) {
+                    float y2 = ((float)y)/((float)size);
+                    for (int x = 0; x<size; x++) {
+                        float x2 = ((float)x)/((float)size);
+                        switch (mode) {
+                            case ColorPicker.RED:
+                                green2 = (int)(x2*255+.49);
+                                blue2 = (int)(y2*255+.49);
+                                break;
+                            case ColorPicker.GREEN:
+                                red2 = (int)(x2*255+.49);
+                                blue2 = (int)(y2*255+.49);
+                                break;
+                            default:
+                                red2 = (int)(x2*255+.49);
+                                green2 = (int)(y2*255+.49);
+                                break;
+                        }
+                        row[x] = 0xFF00_0000 + (red2 << 16) + (green2 << 8) + blue2;
+                    }
+                    image.getRaster().setDataElements(0, y, size, 1, row);
+                }
+                break;
+        }
 		repaint();
 	}
 }

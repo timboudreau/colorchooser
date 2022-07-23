@@ -1,45 +1,19 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2000-2008 Tim Boudreau. All rights reserved.
- * 
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * 
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- * 
- * Contributor(s):
- */
-/*
- * PredefinedPalette.java
+ * Copyright 2010-2019 Tim Boudreau
  *
- * Created on 30. listopad 2003, 10:31
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
-
 package net.java.dev.colorchooser;
 
 import java.awt.Color;
@@ -56,11 +30,11 @@ import javax.swing.UIManager;
 class PredefinedPalette extends Palette {
     NamedColor[] colors;
     private int swatchSize = 16;
-    private int gap = 1;
+    private final int gap = 1;
     private static final Rectangle scratch = new Rectangle();
-    private String name;
+    private final String name;
     /** Creates a new instance of PredefinedPalette */
-    public PredefinedPalette(String name, NamedColor[] colors) {
+    PredefinedPalette(String name, NamedColor[] colors) {
         this.colors = colors;
         this.name = name;
         Arrays.sort(colors);
@@ -71,6 +45,7 @@ class PredefinedPalette extends Palette {
         }
     }
     
+    @Override
     public java.awt.Color getColorAt(int x, int y) {
         Color result = null;
         int idx = indexForPoint (x,y);
@@ -80,6 +55,7 @@ class PredefinedPalette extends Palette {
         return result;
     }
     
+    @Override
     public void paintTo(java.awt.Graphics g) {
         g.setColor(Color.BLACK);
         Dimension size = getSize();
@@ -106,6 +82,7 @@ class PredefinedPalette extends Palette {
         }
     }
     
+    @Override
     public String getNameAt(int x, int y) {
         NamedColor nc = (NamedColor)getColorAt(x,y);
         if (nc != null) {
@@ -148,6 +125,7 @@ class PredefinedPalette extends Palette {
     }
     
     private Dimension size = null;
+    @Override
     public Dimension getSize() {
         if (size == null) {
             size = calcSize();
@@ -197,24 +175,28 @@ class PredefinedPalette extends Palette {
     }
     
     static class BasicNamedColor extends NamedColor implements Comparable {
-        private String name;
-        public BasicNamedColor(String name, int r, int g, int b) {
+        private final String name;
+        BasicNamedColor(String name, int r, int g, int b) {
             super(name,r,g,b);
             this.name = name;
         }
         
+        @Override
         public String getName() {
             return name;
         }
         
+        @Override
         public String getDisplayName() {
             return ColorChooser.getString(getName());
         }
         
+        @Override
         public String toString() {
             return "new java.awt.Color(" + getRed() + "," + getGreen() + "," + getBlue() + ")";
         }
 
+        @Override
         public int compareTo(Object o) {
             Color c = (Color) o;
             //maybe average rgb & compare?
@@ -222,6 +204,7 @@ class PredefinedPalette extends Palette {
             return result;
         }
         
+        @Override
         public String getInstantiationCode() {
             return toString();
         }
@@ -232,19 +215,20 @@ class PredefinedPalette extends Palette {
         return (c.getRed() + c.getGreen() + c.getBlue()) / 3;
     }
     
+    @Override
     public String getDisplayName() {
         return ColorChooser.getString(name);
     }
     
     static String getColorName (Color c) {
-        for (int i = 0; i < swingColors.length; i++) {
-            if (equals(swingColors[i], c)) {
-                return swingColors[i].getDisplayName();
+        for (SwingColor swingColor : swingColors) {
+            if (equals(swingColor, c)) {
+                return swingColor.getDisplayName();
             }
         }
-        for (int i = 0; i < SVGColors.length; i++) {
-            if (equals(SVGColors[i], c)) {
-                return SVGColors[i].getDisplayName();
+        for (NamedColor SVGColor : SVGColors) {
+            if (equals(SVGColor, c)) {
+                return SVGColor.getDisplayName();
             }
         }
         return null;
@@ -405,16 +389,19 @@ class PredefinedPalette extends Palette {
     }; //NOI18N
     
     static class SwingColor extends BasicNamedColor {
-        public SwingColor(String name, int r, int g, int b) {
+        SwingColor(String name, int r, int g, int b) {
             super(name,r,g,b);
         }
+        @Override
         public String toString() {
             return "UIManager.getColor("+getName()+")";
         }
+        @Override
         public String getDisplayName() {
             return getName();
         }
         
+        @Override
         public String getInstantiationCode() {
             return toString();
         }
@@ -574,14 +561,16 @@ class PredefinedPalette extends Palette {
         };
 
         private static class SysColor extends BasicNamedColor {
-            public SysColor(String name, Color scolor) {
+            SysColor(String name, Color scolor) {
                 super(name, scolor.getRed(), scolor.getGreen(), scolor.getBlue());
             }
             
+            @Override
             public String toString() {
                 return "SystemColor." + getName();
             }
             
+            @Override
             public String getDisplayName() {
                 return getName();
             }

@@ -1,50 +1,23 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2000-2008 Tim Boudreau. All rights reserved.
- * 
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * 
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- * 
- * Contributor(s):
- */
-/*
- * RecentColors.java
+ * Copyright 2010-2019 Tim Boudreau
  *
- * Created on 30. listopad 2003, 21:55
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
-
 package net.java.dev.colorchooser;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,10 +46,12 @@ class RecentColors extends Palette {
         return palette;
     }
     
+    @Override
     public java.awt.Color getColorAt(int x, int y) {
         return getWrapped().getColorAt(x,y);
     }
     
+    @Override
     public String getDisplayName() {
         try {
             return ResourceBundle.getBundle(
@@ -87,15 +62,18 @@ class RecentColors extends Palette {
         }
     }
     
+    @Override
     public Dimension getSize() {
         Dimension result = ((PredefinedPalette)getWrapped()).calcSize();
         return result;
     }
     
+    @Override
     public void paintTo(java.awt.Graphics g) {
         getWrapped().paintTo(g);
     }
     
+    @Override
     public String getNameAt(int x, int y) {
         return getWrapped().getNameAt(x,y);
     }
@@ -126,7 +104,7 @@ class RecentColors extends Palette {
         Preferences prefs = getPreferences();
         if (prefs == null) return;
         int count = 0;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Stack stack = new Stack();
         stack.addAll(this.stack);
         while (!stack.isEmpty() && count < 64) {
@@ -161,27 +139,33 @@ class RecentColors extends Palette {
         prefs.put("recentColors", sb.toString()); //NOI18N
     }
     
-    static Map namedMap = null;
+    static Map<Integer, NamedColor> namedMap;
     static NamedColor findNamedColor (Color color) {
         if (namedMap == null) {
             return null;
         }
-        NamedColor result = (NamedColor)namedMap.get(new Integer(color.getRGB()));
+        NamedColor result = (NamedColor)namedMap.get(color.getRGB());
         return result;
     }
     
     static void addToNameCache (NamedColor color) {
-        if (namedMap == null) {
-            namedMap = new HashMap(40);
+        Map<Integer, NamedColor> map = namedMap;
+        if (map == null) {
+            synchronized(RecentColors.class) {
+                map = namedMap;
+                if (map == null) {
+                    map = namedMap = new HashMap<>(40);
+                }
+            }
         }
-        namedMap.put (new Integer(color.getRGB()), color);
+        namedMap.put (color.getRGB(), color);
     }
     
     private Preferences getPreferences() {
         try {
             Preferences base = Preferences.userNodeForPackage(getClass());
             return base.node("1.5"); //NOI18N
-        } catch (AccessControlException ace) {
+        } catch (Exception ace) {
             return null;
         }
     }
@@ -222,7 +206,7 @@ class RecentColors extends Palette {
                 }
             }
             stack.addAll(Arrays.asList(col));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             System.err.println("Error loading color preferences"); //NOI18N
             e.printStackTrace();
         }
@@ -236,25 +220,28 @@ class RecentColors extends Palette {
     private class RecentColor extends PredefinedPalette.BasicNamedColor {
         String displayName;
         String toString = null;
-        public RecentColor (String name, int r, int g, int b) {
+        RecentColor (String name, int r, int g, int b) {
             super(name, r, g, b);
             displayName = name;
         }
 
-        public RecentColor(String name, int r, int g, int b, String toString) {
+        RecentColor(String name, int r, int g, int b, String toString) {
             this(name, r, g, b);
             displayName = name;
             this.toString = toString;
         }
         
+        @Override
         public int compareTo(Object o) {
             return stack.indexOf(o) - stack.indexOf(this);
         }
         
+        @Override
         public String getDisplayName() {
             return displayName;
         }
         
+        @Override
         public boolean equals(Object o) {
             if (o instanceof Color) {
                 Color c = (Color) o;
@@ -263,10 +250,12 @@ class RecentColors extends Palette {
             return false;
         }
         
+        @Override
         public int hashCode() {
             return getRGB();
         }
         
+        @Override
         public String toString() {
             if (toString != null) {
                 return toString;
@@ -289,17 +278,20 @@ class RecentColors extends Palette {
     /** A stand in for colors to fill up the array of recent colors until
      * we really have something to put there. */
     private class DummyColor extends RecentColor {
-        public DummyColor() {
+        DummyColor() {
             super(null, 0,0,0);
         }
+        @Override
         public String getDisplayName() {
             return null;
         }
         //Ensure that no color will match this, so black swing colors can
         //be put into the recent colors array
+        @Override
         public boolean equals(Object o) {
             return o == this;
         }
+        @Override
         public int hashCode() {
             return System.identityHashCode(this);
         }

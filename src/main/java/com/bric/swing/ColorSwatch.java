@@ -1,25 +1,12 @@
-/*
-* @(#)ColorSwatch.java  1.0  2008-03-01
-*
-* Copyright (c) 2008 Jeremy Wood
-* E-mail: mickleness@gmail.com
-* All rights reserved.
-*
-* The copyright of this software is owned by Jeremy Wood.
-* You may not use, copy or modify this software, except in
-* accordance with the license agreement you entered into with
-* Jeremy Wood. For details see accompanying license terms.
-*/
 
 package com.bric.swing;
 
-import java.awt.event.*;
-import java.awt.*;
-import javax.swing.*;
 import com.bric.awt.*;
+import java.awt.*;
 import java.awt.datatransfer.*;
-import java.io.*;
+import java.awt.event.*;
 import java.awt.image.*;
+import javax.swing.*;
 
 /** This is a square, opaque panel used to indicate
  * a certain color.
@@ -40,6 +27,7 @@ public class ColorSwatch extends JPanel {
 	JPopupMenu menu;
 	JMenuItem copyItem;
 	MouseListener mouseListener = new MouseAdapter() {
+        @Override
 		public void mousePressed(MouseEvent e) {
 			if(e.isPopupTrigger()) {
 				if(menu==null) {
@@ -53,6 +41,7 @@ public class ColorSwatch extends JPanel {
 		}
 	};
 	ActionListener actionListener = new ActionListener() {
+        @Override
 		public void actionPerformed(ActionEvent e) {
 			Object src = e.getSource();
 			if(src==copyItem) {
@@ -90,6 +79,7 @@ public class ColorSwatch extends JPanel {
 		return checkerPaint;
 	}
 	
+    @Override
 	public void paint(Graphics g0) {
 		super.paint(g0); //may be necessary for some look-and-feels?
 		
