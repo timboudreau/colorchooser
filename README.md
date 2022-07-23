@@ -5,7 +5,7 @@ This is a simple one-click color chooser with a popup, developed in 1999 for Net
 ago, hosted on java.net.  Loosely based on a lovely color chooser from
 [KPT Bryce](https://en.wikipedia.org/wiki/Bryce_(software)) from the 90s.
 
-<img src="https://github.com/timboudreau/colorchooser/blob/master/www/images/cc1.png?raw=true" alt="Screen shot"/>
+<img src="https://github.com/timboudreau/colorchooser/blob/master/www/images/cc2.png?raw=true" alt="Screen shot"/>
 
 The original web site for the project
 [is here](https://rawcdn.githack.com/timboudreau/colorchooser/89ed33622599f31236cfaa8e1e8b7151b51503e4/www/index.html).
