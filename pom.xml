@@ -74,27 +74,11 @@
             <url>http://download.java.net/maven/2/</url>
             <layout>default</layout>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
     </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>scp://xxx/wellfleet_m2/repository/</url>
-            <uniqueVersion>true</uniqueVersion>
-        </repository>
-        <snapshotRepository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>scp://xxx/wellfleet_m2/repository/</url>
-        </snapshotRepository>
-    </distributionManagement>
-    <scm>
-        <connection>scm:svn:https://https://colorchooser.java.net/svn/wizard/trunk</connection>
-        <developerConnection>scm:svn:https://colorchooser.java.net/svn/wizard/trunk</developerConnection>
-        <url>https://colorchooser.java.net/svn/wizard/trunk</url>
-    </scm>
 </project>
