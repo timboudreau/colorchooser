@@ -1,9 +1,5 @@
-OpenIDE-Module: net.java.dev.colorchooser
-OpenIDE-Module-Public-Packages: net.java.dev.colorchooser.*
-OpenIDE-Module-Java-Dependencies: Java > 1.4
-OpenIDE-Module-Implementation-Version: version1
-OpenIDE-Module-Specification-Version: 1.0
-OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+Manifest-Version: 1.0
+Automatic-Module-Name: com.mastfrog.colorchooser
 
 Name: net/java/dev/colorchooser/ColorChooser.class
 Java-Bean: True
