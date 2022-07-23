@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>net.java.dev</groupId>
+    <groupId>com.mastfrog</groupId>
     <artifactId>colorchooser</artifactId>
-    <packaging>jar</packaging>
-    <version>1.2</version>
+    <version>1.3</version>
     <name>colorchooser</name>
     <url>http://colorchooser.java.net</url>
+    <inceptionYear>1999</inceptionYear>
     <build>
         <plugins>
             <plugin>
@@ -15,8 +15,8 @@
                 <configuration>
                     <showWarning>true</showWarning>
                     <showDeprecation>true</showDeprecation>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -66,19 +66,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
 </project>
