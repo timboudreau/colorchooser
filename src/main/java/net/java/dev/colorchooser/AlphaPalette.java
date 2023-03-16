@@ -57,7 +57,6 @@ public class AlphaPalette extends Palette {
     private float alphaFactorAt(int y) {
         float h = getSize().height;
         float factor = y / h;
-        System.out.println("factor " + y + ": " + factor);
         return 1F - factor;
     }
 
@@ -87,7 +86,6 @@ public class AlphaPalette extends Palette {
         }
         Color c1 = getColorAt(0, 0);
         Color c2 = getColorAt(0, sz.height);
-        System.out.println("A1 " + c1.getAlpha() + " A2 " + c2.getAlpha());
         GradientPaint gp = new GradientPaint(0, 0, c1, 0,
                 sz.height, c2);
         Graphics2D gg = (Graphics2D) g;

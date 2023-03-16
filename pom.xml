@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mastfrog</groupId>
     <artifactId>colorchooser</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <name>colorchooser</name>
     <description>A Swing color chooser with switchable popup palettes choosable with
         shift/ctrl/alt which allows for picking a color in a single mouse-gesture.
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.2</version>
+            <version>5.9.2</version>
             <scope>test</scope>
             <type>jar</type>
         </dependency>
@@ -80,22 +80,22 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M7</version>
+                    <version>3.0.0-M8</version>
                 </plugin>
                 <plugin>
                     <groupId>com.mastfrog</groupId>
                     <artifactId>revision-info-plugin</artifactId>
-                    <version>0.21</version>
+                    <version>0.23</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>
+                    <version>3.11.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
@@ -110,12 +110,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-report-plugin</artifactId>
-                    <version>3.0.0-M7</version>
+                    <version>3.0.0-M9</version>
                 </plugin>
             </plugins>
         </pluginManagement>

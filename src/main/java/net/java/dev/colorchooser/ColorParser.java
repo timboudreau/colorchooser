@@ -80,6 +80,9 @@ public enum ColorParser {
     }
 
     static Color parse(String s) {
+        if (s == null) {
+            return null;
+        }
         for (ColorParser cp : values()) {
             Pattern p = cp.pattern();
             Matcher m = p.matcher(s);

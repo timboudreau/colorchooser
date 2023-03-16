@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2019 Tim Boudreau
+ * Copyright 2010-2022 Tim Boudreau
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
+import java.util.function.Supplier;
 import javax.swing.JComponent;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
@@ -50,7 +52,10 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
     private Popup pop = null;
     private PalettePanel panel = null;
     private Palette pal = null;
-    private static Reference defaultInstance=null;
+    private static Reference<PalettePopup> defaultInstance=null;
+    private Reference<ColorChooser> lastOwner;
+    private Point lastCoords;
+
     /** Creates a new instance of PalettePopup */
     private PalettePopup() {
     }
@@ -58,14 +63,22 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
     public static PalettePopup getDefault() {
         PalettePopup result = null;
         if (defaultInstance != null) {
-            result = (PalettePopup) defaultInstance.get();
+            result = defaultInstance.get();
         }
-
         if (result == null) {
             result = new PalettePopup();
-            defaultInstance = new SoftReference (result);
+            defaultInstance = new SoftReference<> (result);
         }
         return result;
+    }
+
+    ColorChooser lastOwner() {
+        Reference<ColorChooser> ref = lastOwner;
+        return ref == null ? null : ref.get();
+    }
+
+    void setLastOwner(ColorChooser owner) {
+        this.lastOwner = new WeakReference<>(owner);
     }
 
     public Palette currentPalette() {
@@ -74,7 +87,7 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
 
     private PalettePanel getPalettePanel() {
         if (panel == null) {
-            panel = new PalettePanel();
+            panel = new PalettePanel(this::lastOwner);
         }
         return panel;
     }
@@ -88,12 +101,12 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
                     panel.setPalette(pal);
                     panel.repaint();
                 } else {
-                    synchronized (lastOwner.getTreeLock()) {
+                    synchronized (panel.getTreeLock()) {
                         pop.hide();
                         panel.setPalette(pal);
                         pop =
                             PopupFactory.getSharedInstance().getPopup(
-                            lastOwner, getPalettePanel(), lastCoords.x,
+                            lastOwner(), getPalettePanel(), lastCoords.x,
                             lastCoords.y);
                         pop.show();
                     }
@@ -107,8 +120,6 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
         return pal;
     }
 
-    private ColorChooser lastOwner;
-    private Point lastCoords;
     public void showPopup(ColorChooser owner, Point coords) {
         if (pal == null) {
             throw new IllegalStateException("No palette specified");
@@ -138,32 +149,34 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
     }
 
     private void setPopupOwner(ColorChooser owner) {
-        if (lastOwner == owner) {
+        ColorChooser last = lastOwner();
+        if (last == owner) {
             return;
         }
         if (lastOwner != null) {
             detachFromOwner();
-            lastOwner.firePickerVisible(false);
+            last.firePickerVisible(false);
         }
         attachToOwner(owner);
     }
 
     private void detachFromOwner(){
-        if (lastOwner != null) {
-            lastOwner.removeMouseMotionListener(this);
-            lastOwner.removeMouseListener(this);
+        ColorChooser last = lastOwner();
+        if (last != null) {
+            last .removeMouseMotionListener(this);
+            last .removeMouseListener(this);
         }
         lastOwner = null;
     }
 
     private void attachToOwner(ColorChooser owner) {
-        lastOwner = owner;
+        lastOwner = new WeakReference<>(owner);
         owner.addMouseListener(this);
         owner.addMouseMotionListener(this);
     }
 
     public void hidePopup(ColorChooser owner) {
-        if (owner != lastOwner) {
+        if (owner != lastOwner()) {
             return;
         }
         hidePopup();
@@ -183,13 +196,17 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
     }
 
     public boolean isPopupVisible(ColorChooser chooser) {
-        return lastOwner == chooser && isPopupVisible();
+        return lastOwner() == chooser && isPopupVisible();
     }
 
     @Override
     public void mouseDragged(java.awt.event.MouseEvent e) {
         Point p = e.getPoint();
-        SwingUtilities.convertPointToScreen(p, lastOwner);
+        ColorChooser owner = lastOwner();
+        if (owner == null) {
+            return;
+        }
+        SwingUtilities.convertPointToScreen(p, owner);
         convertPointToPalette(p);
         Dimension d = panel.getOffset();
         if (d != null) {
@@ -198,15 +215,15 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
         }
         if (p.x >= 0 && p.y >= 0 && p.x <= pal.getSize().width && p.y < pal.getSize().height) {
             Color color = pal.getColorAt(p.x, p.y);
-            Color oldColor = lastOwner.getColor();
+            Color oldColor = owner.getColor();
             if (!(pal instanceof AlphaPalette) && oldColor != null && oldColor.getAlpha() < 255) {
                 color = new Color(color.getRed(), color.getGreen(), color.getBlue(),
                     oldColor.getAlpha());
             }
-            lastOwner.setTransientColor(color);
+            owner.setTransientColor(color);
             panel.setDisplayTitle(pal.getNameAt(p.x,p.y));
         } else {
-            lastOwner.setTransientColor(null);
+            owner.setTransientColor(null);
             panel.setDisplayTitle(null);
         }
     }
@@ -230,10 +247,15 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
         }
     }
 
-    private class PalettePanel extends JComponent {
+    private static final class PalettePanel extends JComponent {
+        private final Supplier<ColorChooser> lastOwnerSupplier;
         private Palette pal=null;
-        private PalettePanel() {}
         private String title=null;
+
+        private PalettePanel(Supplier<ColorChooser> lastOwnerSupplier) {
+            this.lastOwnerSupplier = lastOwnerSupplier;
+        }
+
         public void setPalette(Palette pal) {
             Dimension oldSize = null;
             if (pal != null && isShowing()) {
@@ -317,8 +339,9 @@ class PalettePopup extends MouseAdapter implements MouseMotionListener, Property
             if (pal != null) {
                 Dimension result = new Dimension(pal.getSize());
                 int spacing = 14;
-                if (lastOwner != null) {
-                    Graphics g = lastOwner.getGraphics();
+                ColorChooser owner = lastOwnerSupplier.get();
+                if (owner != null) {
+                    Graphics g = owner.getGraphics();
                     if (g == null) {
                         try {
                             g = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().createCompatibleImage(1, 1).createGraphics();

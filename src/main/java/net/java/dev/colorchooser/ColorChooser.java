@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2019 Tim Boudreau
+ * Copyright 2010-2022 Tim Boudreau
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 package net.java.dev.colorchooser;
 
@@ -34,19 +33,22 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.Objects;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import static java.util.ResourceBundle.Control.FORMAT_PROPERTIES;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Segment;
 
 /**
  * A color chooser which can pop up a pluggable set of palettes. The palette
@@ -148,9 +150,12 @@ public final class ColorChooser extends JComponent {
     }
 
     /**
-     * Overridden to return <code>UI_CLASS_ID</code>
+     * Overridden to return <code>UI_CLASS_ID</code>.
+     *
+     * @since 1.5 - the previous version mis-capitalized the method name
      */
-    public String getUIClassId() {
+    @Override
+    public String getUIClassID() {
         return UI_CLASS_ID;
     }
 
@@ -177,8 +182,16 @@ public final class ColorChooser extends JComponent {
         return ColorParser.toMinimalString(getColor());
     }
 
-    public boolean setAsText(String s) {
-        Color c = ColorParser.parse(s);
+    /**
+     * Set the color using a string in one of the formats supported by
+     * ColorParser, such as hexadecimal or comma-delimited rgb.
+     *
+     * @param colorAsText A string describing a color
+     * @return true if the string was parsed successfully
+     * @since 1.4
+     */
+    public boolean setAsText(String colorAsText) {
+        Color c = ColorParser.parse(colorAsText);
         if (c != null) {
             setColor(c);
             return true;
@@ -190,6 +203,8 @@ public final class ColorChooser extends JComponent {
      * Set the color this color chooser currently represents. Note this will
      * fire a change in <code>PROP_COLOR</code> but will not trigger an action
      * event to be fired.
+     *
+     * @param c the color
      */
     public void setColor(Color c) {
         if (c.getClass() != Color.class) {
@@ -250,7 +265,7 @@ public final class ColorChooser extends JComponent {
     public Color getTransientColor() {
         return transientColor == null ? null
                 : new Color(transientColor.getRed(), transientColor.getGreen(),
-                        transientColor.getBlue());
+                        transientColor.getBlue(), transientColor.getAlpha());
     }
 
     /**
@@ -554,6 +569,7 @@ public final class ColorChooser extends JComponent {
     }
 
     public static void main(String[] args) {
+        System.setProperty("awt.useSystemAAFontSettings", "lcd_hrgb");
         try {
             UIManager.setLookAndFeel(new NimbusLookAndFeel()); //NOI18N
         } catch (UnsupportedLookAndFeelException e) {
@@ -568,10 +584,55 @@ public final class ColorChooser extends JComponent {
 
         cc.setFont(new Font("Arial", Font.PLAIN, 48));
 
-        JTextArea area = new JTextArea(ColorParser.toMinimalString(cc.getColor()));
+        boolean[] updating = new boolean[1];
+
+        JTextField area = new JTextField(ColorParser.toMinimalString(cc.getColor()));
         cc.addActionListener((ActionEvent ae) -> {
             jb1.setForeground(cc.getColor());
-            area.setText(ColorParser.toMinimalString(cc.getColor()));
+            if (!updating[0]) {
+                area.setText(ColorParser.toMinimalString(cc.getColor()));
+            }
+        });
+
+        area.getDocument().addDocumentListener(new DocumentListener() {
+            Segment s = new Segment();
+
+            private void updateAsText(Document doc) {
+                if (updating[0]) {
+                    return;
+                }
+                updating[0] = true;
+                try {
+                    doc.render(() -> {
+                        try {
+                            doc.getText(0, doc.getLength(), s);
+                        } catch (BadLocationException ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                    String txt = s.toString();
+                    if (!txt.isEmpty()) {
+                        cc.setAsText(txt);
+                    }
+                } finally {
+                    updating[0] = false;
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateAsText(e.getDocument());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateAsText(e.getDocument());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                // do nothing
+            }
         });
 
         final ColorChooser cc2 = new ColorChooser();
